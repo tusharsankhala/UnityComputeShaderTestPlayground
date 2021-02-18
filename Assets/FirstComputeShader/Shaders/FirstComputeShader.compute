@@ -1,0 +1,44 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SolidRed
+#pragma kernel SolidCircle
+#pragma kernel SolidSquare
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+int texResolution;
+
+float InCircle(float2 pt, float radius)
+{
+	return (length(pt) < radius) ? 1 : 0;
+}
+
+float InSquare(float2 pt, float sideLength)
+{
+	return abs(pt.x) <= sideLength && abs(pt.y) <= sideLength;
+}
+
+[numthreads(8,8,1)]
+void SolidRed(uint3 id : SV_DispatchThreadID)
+{
+	uint halfRes = texResolution >> 1;
+	Result[id.xy] = float4(step(halfRes, id.x), step(halfRes, id.y), 0.0, 1.0);
+}
+
+[numthreads(8, 8, 1)]
+void SolidCircle(uint3 id : SV_DispatchThreadID)
+{
+	int halfRes = texResolution >> 1;
+	float res = InCircle((float2)((int2)id.xy - halfRes), (float) (texResolution >> 3));
+
+	Result[id.xy] = float4(res, res, 0.0, 1.0);
+}
+
+[numthreads(8, 8, 1)]
+void SolidSquare(uint3 id : SV_DispatchThreadID)
+{
+	int halfRes = texResolution >> 1;
+	float res = InSquare((float2)((int2)id.xy - halfRes), (float)(texResolution >> 3));
+
+	Result[id.xy] = float4(res, res, 0.0, 1.0);
+}
