@@ -1,0 +1,76 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Circles
+#pragma kernel ClearColor
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+shared RWTexture2D<float4> Result;
+
+int texResolution;
+float4 clearColor;
+float4 circleColor;
+float time;
+
+/*Returns pseudo random number in range 0 <= x < 1 */
+float random(float value, float seed = 0.546)
+{
+    float random = (frac(sin(value + seed) * 143758.5453));// + 1.0)/2.0;
+    return random;
+}
+
+float2 random2(float value)
+{
+    return float2(random(value, 3.9812), random(value, 7.1536)
+    );
+}
+
+void Plot1(int x, int y, int2 center)
+{
+    Result[uint2(center.x + x, center.y + y)] = circleColor;
+}
+
+void Plot8(int x, int y, int2 center)
+{
+    Plot1(x, y, center);     Plot1(y, x, center);
+    Plot1(x, -y, center);    Plot1(-y, x, center);
+    Plot1(-x, y, center);    Plot1(y, -x, center);
+    Plot1(-x, -y, center);   Plot1(-y, -x, center);
+}
+
+void DrawCircle(int2 center, int radius)
+{
+    int x = 0;
+    int y = radius;
+    int d = 1 - radius;
+
+    while (x < y)
+    {
+        if( d < 0)
+        {
+            d += 2 * x + 3;
+        }
+        else
+        {
+            d += 2 * (x - y) + 5;
+            y--;
+        }
+
+        Plot8(x, y, center);
+
+        x++;
+    }
+}
+
+[numthreads(1, 1, 1)]
+void Circles (uint3 id : SV_DispatchThreadID)
+{
+    int2 center = (int2)(random2((float)id.x + time) * (float)texResolution);
+    int radius = (int)(random((float)id.x) * 30);
+    DrawCircle(center, radius);
+}
+
+[numthreads(8, 8, 1)]
+void ClearColor (uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = clearColor;
+}
