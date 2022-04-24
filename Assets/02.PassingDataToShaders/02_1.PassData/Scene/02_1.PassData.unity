@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57dedce47a54f684ebc56572be987a8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  computeShader: {fileID: 7200000, guid: 1dc0bb5cc05d6904792c384d3a2793e0, type: 3}
+  shader: {fileID: 7200000, guid: 1dc0bb5cc05d6904792c384d3a2793e0, type: 3}
   texResolution: 1024
   clearColor: {r: 1, g: 1, b: 1, a: 0}
   circleColor: {r: 1, g: 0, b: 0, a: 1}
